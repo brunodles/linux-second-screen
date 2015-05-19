@@ -2,75 +2,39 @@
 App to use any android device as second monitor on linux.
 
 ## How it will work
-The app may have multiples MainActivities   
-1. Push the app using adb   
-3. Ask the app the device resolution   
-4. Create a virtual display matching device answer   
-5. Start vnc server   
-6. Push host's configurations to device   
-7. Start the app using adb   
-
-# Until the app's completion, use this tutorial below.
-
-# Tutorial
-Change display configurations and connect with vnc.
-
-## Sample Device Configurations
-* Notebook Screen		        1366 x 768
-* Android Tablet Screen			1280 x 800
-
-## Method 1
-Make the current display bigger matching the **sum** of `Notebook Screen` and `Tablet Screen`.   
-Enlarge the screen with the result
-
-      xrandr --fb 2646x800
-		  
-Start VNC Server   
-Params `width`x`height`+`startWidth`+`startHeight`.   
-The `startWidth` is one pixel after notebook width.
-
-      x11vnc -clip 1280x800+1367+0
-
-Connect with wanted vnc client.
-
-### Clean
-Reset display 0.
-
-      xrandr -s 0
+The app may have multiples MainActivities.   
+1. [ ] Push the app using adb   
+3. [x] Ask device for it's resolution. (using `adb` or the `app`)   
+4. [x] Create a virtual display matching device answer   
+5. [x] Start vnc server   
+6. [ ] Push host's configurations to device   
+7. [ ] Start the app using adb   
+We already made some of those things using a simple script.   
 
 
-# Method 2
-Create a virtaul display.   
-Run `cvt` with wanted tablet display sizes.
+# The power of the script
+Take a look at the [monitor.sh](https://github.com/Dlimaun/linux-second-screen/blob/master/monitor.sh).   
+This script will create the virtual monitor and start x11vnc server for you.   
+You only need to pass those parameters, if you want.   
+1. VIRTUAL display to be used. If you don't know use `VIRTUAL1`.   
+2. Device resolution using `width`x`height`, without bracets. Example `800x600`.   
+3. Position `left` or `right`. Be shure that is in lowercase otherwise it won't work.   
 
-      cvt 1280 800
-
-Use the `cvt` output to create a `mode`
-
-      xrandr --newmode "1280x800_60.00"   83.50  1280 1352 1480 1680  800 803 809 831 -hsync +vsync
-
-Add the mode to a virtual display
-
-      xrandr --addmode VIRTUAL1 1280x800_60.00
-
-Create a Virtual Display
-
-      xrandr --output VIRTUAL1 --mode 1280x800_60.00 --left-of LVDS1
-
-Start VNC Server
-
-      x11vnc -clip 1280x800+0+0
-
-Connect with wanted vnc client.
-
-### Clean
-
-      xrandr --output VIRTUAL1 --off
+## Mixing with ADB?
+Some Android device return can return the resolution throught command line.   
+To use that you will need to enable developer mode on your device. [Check this](http://developer.android.com/tools/help/adb.html#Enabling) to enable.   
+To finish you'll need to point your adb location inside the script file.   
+With this you don't need to pass any parameters to the script.   
+(This is only recomended for developers)
 
 
-## To check displays and modes
-		xrandr -q
+## For those who aren't using a laptop.
+In script file, there's a comment on top asking you to select one of those `fisical`.   
+So if you are using `VGA` or `HDMI` video output, comment `fisical="LVDS1"` and uncomment your video output.   
 
+
+## if you still want to do it by hand
+Follow this [tutorial](https://github.com/Dlimaun/linux-second-screen/blob/master/tutorial.md).   
 
 
 # Similar apps
