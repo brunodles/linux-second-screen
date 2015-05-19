@@ -80,6 +80,12 @@ v_width=$(bc <<< "scale=0; $d_width / $proportion")
 v_height=$h_height
 echo "virtual proportion = $proportion"
 echo "width   = $v_width"
+status_bar=32
+system_bar=48
+## Remove status bar height
+v_height=$(($v_height - $status_bar))
+## Remove system bar height
+v_height=$(($v_height - $system_bar))
 echo "height  = $v_height"
 echo ""
 
