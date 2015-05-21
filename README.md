@@ -15,10 +15,12 @@ We already made some of those things using a simple script.
 # The power of the script
 Take a look at the [monitor.sh](https://github.com/Dlimaun/linux-second-screen/blob/master/monitor.sh).   
 This script will create the virtual monitor and start x11vnc server for you.   
-You only need to pass those parameters, if you want.   
-1. VIRTUAL display to be used. If you don't know use `VIRTUAL1`.   
-2. Device resolution using `width`x`height`, without bracets. Example `800x600`.   
-3. Position `left` or `right`. Be shure that is in lowercase otherwise it won't work.   
+You only need to pass those parameters, if you want. The parameters could be passed in any order   
+* Device resolution using [width]x[height], without bracets. Sample 800x600
+* `-v` - VIRTUAL display to be used. Sample v1, v2, v3
+* `-left` or `-right  - the position of your device, related to you display
+* `-hst` - Subtract status bar size from virtual display
+* `-hsb` - Subtract system bar size from virtual display
 
 ## Mixing with ADB?
 Some Android device return can return the resolution throught command line.   
