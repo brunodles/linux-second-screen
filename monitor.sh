@@ -1,9 +1,12 @@
 #!/bin/bash
 
 ## PARAMS
-## 1 - VIRTUAL display to be used. Sample VIRTUAL1 or VIRTUAL2
-## 2 - Device resolution using [width]x[height], without bracets
-## 3 - Position left or right
+## Device resolution using [width]x[height], without bracets. Sample 800x600
+## -v - VIRTUAL display to be used. Sample v1, v2, v3
+## -left  - If our device is on the left
+## -right - If our device is on the right
+## -hst	  - Subtract status bar size from virtual display
+## -hsb	  - Subtract system bar size from virtual display
 
 ### Uncomment what you are using, hardcoded
 ## Laptop
@@ -16,23 +19,26 @@ fisical="LVDS1"
 ## ADB path. hardcoded
 adb_bin=~/android-sdk-linux/platform-tools/adb
 
+#echo $@
+## Regex to understand params
+virtual=$(echo $@ | grep -Po '\-v\d' | grep -Po '\d')
+device=$(echo $@ | grep -Po '\d+x\d+')
+position=$(echo $@ | grep -Po '\-(left|right)' | grep -Po '\w+')
+hide_statusbar=$(echo $@ | grep -Po '\-hst')
+hide_systembar=$(echo $@ | grep -Po '\-hsb')
 
-## Log and Run commands
-function run () {
-	echo "$1"
-	$1
-}
 
-## Find Possible IPs
-echo "Possible IPs, use 'ifconfig' to check it out, if you want"
-ifconfig | grep 'inet addr' | cut -d':' -f 2 | cut -d' ' -f 1
-echo ""
+
+## Use VIRTUAL1 if none was passed
+if [ -z "$virtual" ] ; then
+	virtual="VIRTUAL1"
+else
+	virtual="virtual${virtual}"
+fi
 
 ## Find Android device Resolution, some devices works
-if [ -z "$2" ] ; then
+if [ -z "$device" ] ; then
 	device=$($adb_bin shell dumpsys window displays | grep init | cut -d'=' -f 2 | cut -d' ' -f 1)
-else
-	device=$2
 fi
 if [ -z "$device" ] ; then
 	echo "Can't read device resolution using adb"
@@ -43,16 +49,9 @@ else
 	d_height=$(echo $device | cut -d'x' -f 2)
 fi
 
-echo "device  = $device"
-echo "width   = $d_width"
-echo "height  = $d_height"
-echo ""
-
 ## Check param position, this position is where the user want the new screen
-if [ -z "$3" ] ; then
+if [ -z "$position" ] ; then
 	position="left"
-else
-	position=$3
 fi
 #echo "position= $position"
 if [ "$position" = "left" ] ; then
@@ -62,15 +61,20 @@ else
 fi
 
 
+
 ## Find Host Resolution
 host=$(xdpyinfo  | grep 'dimensions:' | cut -d' ' -f 7)
 h_width=$(echo $host | cut -d'x' -f 1)
 h_height=$(echo $host | cut -d'x' -f 2)
 
-echo "host    = $host"
-echo "width   = $h_width"
-echo "height  = $h_height"
+
+
+## Find Possible IPs
+echo "Possible IPs, use 'ifconfig' to check it out, if you want"
+ifconfig | grep 'inet addr' | cut -d':' -f 2 | cut -d' ' -f 1
 echo ""
+
+
 
 
 ## Proportion, bash don't handle float, only integers so we use bc to do that operation
@@ -78,25 +82,18 @@ echo ""
 proportion=$(bc <<< "scale=2; $d_height / $h_height")
 v_width=$(bc <<< "scale=0; $d_width / $proportion")
 v_height=$h_height
-echo "virtual proportion = $proportion"
-echo "width   = $v_width"
+#echo "width   = $v_width"
 status_bar=32
 system_bar=48
 ## Remove status bar height
-v_height=$(($v_height - $status_bar))
-## Remove system bar height
-v_height=$(($v_height - $system_bar))
-echo "height  = $v_height"
-echo ""
-
-
-## Use VIRTUAL1 if none was passed
-if [ -z "$1" ] ; then
-	virtual="VIRTUAL1"
-else
-	virtual=$1
+if [ ! -z "$hide_statusbar" ] ; then
+	v_height=$(($v_height - $status_bar))
 fi
-echo "Display = $virtual"
+## Remove system bar height
+if [ ! -z "$hide_systembar" ] ; then
+	v_height=$(($v_height - $system_bar))
+fi
+#echo "height  = $v_height"
 
 
 ## Build the modeline, the display configurations
@@ -105,8 +102,7 @@ modeline=$(cvt $v_width $v_height 20.00 | grep "Modeline" | cut -d' ' -f 2-17)
 mode=$(echo "$modeline" | cut -d' ' -f 1)
 ## remove quotes, don't need to remove quotes
 #mode=${mode//\"}
-res=$(echo $mode | cut -d'_' -f 1)
-echo "device  = $res"
+res=$(echo ${mode//\"} | cut -d'_' -f 1)
 
 
 ## Evaluates the start width position, to clip vnc
@@ -116,8 +112,26 @@ echo "device  = $res"
 
 #echo $modeline
 #echo $mode
+
+echo "device  = $device"
+#echo "width   = $d_width"
+#echo "height  = $d_height"
+
+echo "host    = $host"
+#echo "width   = $h_width"
+#echo "height  = $h_height"
+echo "scale   = $proportion"
+
+echo "Display = $virtual"
+
+echo "virtual = $res"
 echo ""
 
+## Log and Run commands
+function run () {
+	echo "$1"
+	$1
+}
 
 ## Create Virtual Display
 run "xrandr --newmode $modeline"
