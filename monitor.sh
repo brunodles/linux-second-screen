@@ -33,7 +33,7 @@ hide_systembar=$(echo $@ | grep -Po '\-hsb')
 if [ -z "$virtual" ] ; then
 	virtual="VIRTUAL1"
 else
-	virtual="virtual${virtual}"
+	virtual="VIRTUAL${virtual}"
 fi
 
 ## Find Android device Resolution, some devices works
