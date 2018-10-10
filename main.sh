@@ -18,6 +18,9 @@ main() {
     startVnc)
       startVnc ${@:2}
     ;;
+    ssh)
+      ssh ${@:2}
+    ;;
     setup)
       setup
     ;;
@@ -101,6 +104,10 @@ calcRes() {
 
 startVnc() {
   x11vnc -display :0 -clip xinerama$1 -forever -scale 1:nb -xrandr
+ }
+
+ssh() {
+  sudo service ssh $1
 }
 
 setup() {
@@ -131,8 +138,14 @@ Commands
  startVnc <xinerama>
   - start vnc for given display
 
+ ssh <start|stop|restart>
+  - command ssh server, just a wrapper to start, stop or restart the ssh server daemon.
+    This will be needed to run screen commands
+
  setup
   - install necessary tools
+
+ 
 
  help
   - show this message
