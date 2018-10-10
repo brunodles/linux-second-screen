@@ -103,8 +103,8 @@ calcRes() {
 }
 
 startVnc() {
-  x11vnc -display :0 -clip xinerama$1 -forever -scale 1:nb -xrandr
- }
+  x11vnc -display :0 -clip xinerama$1 -forever -xrandr -shared -repeat -noxdamage ${@:2}
+}
 
 ssh() {
   sudo service ssh $1
@@ -135,8 +135,10 @@ Commands
   - calculate possible resolutions for a device.
     As devices may have same or  even greater resolutions compared to a normal display, de idea is to use a lower resolution for this device. This leads to a better visualization and performance.
 
- startVnc <xinerama>
+ startVnc <xinerama> <x11vnc commands>
   - start vnc for given display
+    example: $0 startVnc 1 -scale 1/2:nb -ncache 0
+      This will start vnc using scale 1/2 wihout bleeding and 0 cache
 
  ssh <start|stop|restart>
   - command ssh server, just a wrapper to start, stop or restart the ssh server daemon.
