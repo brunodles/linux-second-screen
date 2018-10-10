@@ -107,7 +107,17 @@ startVnc() {
 }
 
 ssh() {
-  sudo service ssh $1
+  if [ "$1" == "setup" ]; then
+    mkdir .ssh
+    ssh-keygen -t rsa -f ./.ssh/ssh_host_rsa_key
+    ssh-keygen -t ecdsa -f ./.ssh/ssh_host_ecdsa_key
+    ssh-keygen -t ed25519 -f ./.ssh/ssh_host_ed25519_key
+  else
+    sudo service ssh $1
+  fi
+  # it won't be so easy, we may need to start a new ssh server with custom settings.
+  # To do so, we need to create ssh keys for our server, since we can't point to user ones.
+  # /usr/sbin/sshd -p 22200 
 }
 
 setup() {
@@ -144,10 +154,17 @@ Commands
   - command ssh server, just a wrapper to start, stop or restart the ssh server daemon.
     This will be needed to run screen commands
 
+ screenStart <name> [commands [args]]
+  - start a new screen with given name. This will allow others to connect to the same terminal, it's like a shared terminal.
+
+ screenList
+  - list shared screens.
+
+ screenConnect <name>
+  - connect o a screen with given name
+
  setup
   - install necessary tools
-
- 
 
  help
   - show this message
