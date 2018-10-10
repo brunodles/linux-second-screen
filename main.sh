@@ -15,6 +15,12 @@ main() {
     calcRes)
       calcRes ${@:2}
     ;;
+    startVnc)
+      startVnc ${@:2}
+    ;;
+    setup)
+      seup
+    ;;
     *)
       help
     ;;
@@ -93,6 +99,14 @@ calcRes() {
 
 }
 
+startVnc() {
+  x11vnc -display :0 -clip xinerama$1 -forever -scale 1:nb -xrandr
+}
+
+setup() {
+  sudo apt-get install x11vnc bc
+}
+
 help() {
   cat <<TEXT
 Virtual Display Helper
@@ -109,6 +123,12 @@ Commands
  calcRes <width> <heigh> <inches>
   - calculate possible resolutions for a device.
     As devices may have same or  even greater resolutions compared to a normal display, de idea is to use a lower resolution for this device. This leads to a better visualization and performance.
+
+ startVnc <xinerama>
+  - start vnc for given display
+
+ setup
+  - install necessary tools
 
  help
   - show this message
