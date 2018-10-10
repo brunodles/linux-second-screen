@@ -19,7 +19,7 @@ main() {
       startVnc ${@:2}
     ;;
     setup)
-      seup
+      setup
     ;;
     *)
       help
@@ -104,7 +104,11 @@ startVnc() {
 }
 
 setup() {
-  sudo apt-get install x11vnc bc
+  # x11vnc 		- vnc server used to bind to part o xServer
+  # bc 			- bash calculator, as we can't do some operations with default bash
+  # screen 		- terminal used to share session, like vnc but with terminal
+  # openssh-server 	- secure shell, a tool to connect to terminal remotely
+  sudo apt-get install x11vnc bc screen openssh-server
 }
 
 help() {
