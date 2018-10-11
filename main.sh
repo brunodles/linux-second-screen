@@ -110,13 +110,11 @@ startVnc() {
 }
 
 windowVnc() {
-  winId=$1
-  if [ -z "$winId" ]; then
-    winId=$(xwininfo | grep -Eio "Window id: (0x\w+)" | cut -d' ' -f3)
-  fi
+  echo Click on wanted window to start vnc
+  winId=$(xwininfo | grep -Eio "Window id: (0x\w+)" | cut -d' ' -f3)
   title=$(xprop -id $winId | awk '/_NET_WM_NAME/{$1=$2="";print}' | cut -d'"' -f2)
   echo Window id $winId - \"$title\"
-  x11vnc -forever -shared -repeat -noxdamage -id $winId
+  x11vnc -forever -shared -repeat -noxdamage -id $winId $@
 }
 
 ssh() {
@@ -158,14 +156,13 @@ Commands
   - calculate possible resolutions for a device.
     As devices may have same or  even greater resolutions compared to a normal display, de idea is to use a lower resolution for this device. This leads to a better visualization and performance.
 
- startVnc <xinerama> <x11vnc commands>
+ startVnc <xinerama> [x11vnc commands]
   - start vnc for given display
     example: $0 startVnc 1 -scale 1/2:nb -ncache 0
       This will start vnc using scale 1/2 wihout bleeding and 0 cache
 
- window [id]
-  - start vnc for given window id, to discovery use xwininfo and click on desired window
-    If no id was given you will need to click on desired window
+ window [x11vnc commands]
+  - start vnc for a window, you will need to click on desired window
 
  ssh <start|stop|restart>
   - command ssh server, just a wrapper to start, stop or restart the ssh server daemon.
