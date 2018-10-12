@@ -1,34 +1,12 @@
 #!/bin/bash
-declare INTEL_FILE="/usr/share/X11/xorg.conf.d/20-intel.conf"
 
 main() {
   case $1 in
-    create)
-      createDummyDisplay ${@:2}
-    ;;
-    editIntel)
-      editIntel
-    ;;
-    setRes)
-      setRes ${@:2}
-    ;;
-    calcRes)
-      calcRes ${@:2}
-    ;;
-    startVnc)
-      startVnc ${@:2}
-    ;;
-    window)
-      windowVnc ${@:2}
+    display|vnc|term|droid)
+      ./$1.sh ${@:2}
     ;;
     ssh)
       ssh ${@:2}
-    ;;
-    term*)
-      term $@
-    ;;
-    droid)
-      droid ${@:2}
     ;;
     setup)
       setup
@@ -37,90 +15,6 @@ main() {
       help
     ;;
   esac
-}
-
-createDummyDisplay() {
-count=$1
-  if [ -z "$count" ];then
-    count=1
-  fi
-  if [ "$EUID" -ne 0 ]; then
-    echo We may need sudo permissions to write the following file \"$INTEL_FILE\"
-    echo
-  fi
-  sudo tee $INTEL_FILE > /dev/null <<TEXT
-Section "Device"
-    Identifier "intelgpu0"
-    Driver "intel"
-    Option "VirtualHeads" "$count"
-EndSection
-TEXT
-
- echo -e "Result\033[0;33m"
- cat $INTEL_FILE
- echo -e "\033[0m"
- echo Restart is needed to apply changes.
-}
-
-editIntel() {
-  sudo vim $INTEL_FILE
-}
-
-setRes() {
-  virtual=$1
-  width=$2
-  height=$3
-  modeline=$(cvt $width $height 20 | grep "Modeline" | cut -d' ' -f 2-17)
-  modeName=$(echo $modeline | cut -d' ' -f 1)
-  
-  modeline=${modeline//\"}
-  modeName=${modeName//\"}
-
-  echo Creating \"$modeName\" on \"$virtual\"
-  xrandr --newmode $modeline
-  xrandr --addmode $virtual $modeName
-  xrandr --output $virtual --mode $modeName --auto
-}
-
-calcRes() {
-  v_width=$1
-  v_height=$2
-  v_inches=$3
-
-  f_xrandr=$(xrandr | grep primary)
-  f_res=$(echo $f_xrandr | cut -d' ' -f 4)
-  f_res=(${f_res//[+x]/ })
-  f_dimens=$(echo $f_xrandr | cut -d' ' -f 13,15)
-  f_dimens=(${f_dimens//m/})
-  
-  f_width=${f_res[0]}
-  f_height=${f_res[1]}
-  f_inches=$(bc <<< "scale=2; sqrt( ${f_dimens[0]}^2 + ${f_dimens[1]}^2 ) * 0.0393701")
-
-  proportion=$(bc <<< "scale=4; $v_inches / $f_inches")
-
-  r_width=$(bc <<< "scale=0; $v_width * $proportion")
-  r_height=$(bc <<< "scale=0; $v_height * $proportion")
-
-  echo Proportion $proportion
-  echo "        Width x Height Inches"
-  echo "fisical  $f_width x $f_height $f_inches"
-  echo "virtual  $v_width x $v_height $v_inches"
-  echo "----------------------------"
-  echo " result  $r_width x $r_height"
-
-}
-
-startVnc() {
-  x11vnc -display :0 -clip xinerama$1 -forever -xrandr -shared -repeat -noxdamage ${@:2}
-}
-
-windowVnc() {
-  echo Click on wanted window to start vnc
-  winId=$(xwininfo | grep -Eio "Window id: (0x\w+)" | cut -d' ' -f3)
-  title=$(xprop -id $winId | awk '/_NET_WM_NAME/{$1=$2="";print}' | cut -d'"' -f2)
-  echo Window id $winId - \"$title\"
-  x11vnc -forever -shared -repeat -noxdamage -id $winId $@
 }
 
 ssh() {
@@ -137,44 +31,6 @@ ssh() {
   # /usr/sbin/sshd -p 22200 
 }
 
-term() {
-  $1 ${@:2}
-}
-
-termStart() {
-  name=$1
-  commands=${@:2}
-  screen -dmS $name
-  screen -X $name $commands
-  termConnect $name
-}
-
-termList() {
-  screen -ls
-}
-
-termConnect() {
-  screen -x $1
-}
-
-droid() {
-  droid_$1 ${@:2} 
-}
-
-droid_setDate() {
-  command="adb shell su -c \"date -s $1\" 0"
-  echo $command
-  $command
-}
-
-droid_help() {
-  cat <<TEXT
-Droid Commands
- setDate <date format>
-  - change device date using format yyyyMMdd.HHmmss
-TEXT
-}
-
 setup() {
   # x11vnc 		- vnc server used to bind to part o xServer
   # bc 			- bash calculator, as we can't do some operations with default bash
@@ -188,41 +44,21 @@ help() {
 Virtual Display Helper
 
 Commands
- create <n>
-  - creates n virtual displays
-    example: $0 create 4
+ display
+  - Use to manage virtual display. With it we can also calculate suggested resolution for device.
 
- setRes <display> <width> <height>
-  - set resolution for a virtual display
-    example: $0 setRes VIRTUAL1 800 600
-
- calcRes <width> <heigh> <inches>
-  - calculate possible resolutions for a device.
-    As devices may have same or  even greater resolutions compared to a normal display, de idea is to use a lower resolution for this device. This leads to a better visualization and performance.
-
- startVnc <xinerama> [x11vnc commands]
-  - start vnc for given display
-    example: $0 startVnc 1 -scale 1/2:nb -ncache 0
-      This will start vnc using scale 1/2 wihout bleeding and 0 cache
-
- window [x11vnc commands]
-  - start vnc for a window, you will need to click on desired window
+ vnc
+  - Wrapper for vnc commands. With it is possible to start vnc for a specific display or a window
 
  ssh <start|stop|restart>
   - command ssh server, just a wrapper to start, stop or restart the ssh server daemon.
     This will be needed to run screen commands
 
- termStart <name> [commands [args]]
-  - start a new screen with given name. This will allow others to connect to the same terminal, it's like a shared terminal.
+ term
+  - Wrapper to share terminal with others. They may need to connect using ssh.
 
- termList
-  - list shared screens.
-
- termConnect <name>
-  - connect o a screen with given name
-
- droid <setDate> [args]
-  - send droid commands
+ droid
+  - send commands to android
 
  setup
   - install necessary tools

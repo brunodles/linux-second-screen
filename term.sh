@@ -1,0 +1,122 @@
+#!/bin/bash
+ALIAS_FILE=~/.term_sharedAliases
+
+main() {
+  case $1 in
+    start|list|connect|stop|setup|setupAliases)
+      $1 ${@:2}
+    ;;
+    *)
+      help
+    ;;
+  esac
+}
+
+start() {
+  name=$1
+  commands=${@:2}
+  previous=$(findByName $name)
+
+  if [ -z "$previous" ]; then
+    screen -dmS $name
+  
+    if [ -z "$commands" ];then
+      screen -rx $name
+    else
+      screen -rx $name bash $commands
+    fi
+  else
+    connect $previous
+  fi
+}
+
+list() {
+  screen -ls
+}
+
+connect() {
+  screen -rx $1
+}
+
+stop() {
+  name=$(findByName $1)
+  if [ -z "$name" ]; then
+    echo No running session for \"$1\"
+  else
+    screen -X -S $name quit
+  fi
+}
+
+findByName() {
+  echo $(screen -ls | grep -m 1 -oEi "(\w+\.$1)")
+}
+
+setup() {
+  sudo apt-get -y install screen
+}
+
+setupAliases() {
+  createAliasFile
+  setupAliases_onFile ~/.bashrc
+  setupAliases_onFile ~/.zshrc
+}
+
+createAliasFile() {
+  echo Creating alias file for shared terminal \"$ALIAS_FILE\"
+  cat >$ALIAS_FILE<<TEXT
+#if [ -z "\$STY" ] && [ "\$SSH_CONNECTION" != "" ]; then
+#    screen -x shared
+##    tmux attach-session -t ssh || tmux new-session -s ssh
+#    exit
+#fi
+function exit {
+  if [ -z "\$STY" ] ; then
+    builtin exit
+  else
+    echo This commands is disabled during terminal sharing.
+    echo If you want to quit and close all connections use
+    echo  screen -x quit
+    echo If you just want to deatach use keyboard shotcut:
+    echo  [ctrl] + [a] + [v]
+  fi
+}
+TEXT
+}
+
+setupAliases_onFile() {
+  echo Setting up import on \"$1\".
+  if [ -f $1 ]; then
+    cat >>$1<<TEXT
+if [ -f $ALIAS_FILE ]; then
+  . ~/.term_sharedAliases
+fi
+TEXT
+  else
+    echo File \"$1\" not found.
+  fi
+}
+
+help() {
+  cat <<TEXT
+Terminal sharing
+
+Commands:
+ start <name> [commands [args]]
+  - start a new terminal with given name. This will allow others to connect to the same terminal.
+
+ list
+  - list shared terminals.
+
+ connect <name>
+  - connect o a terminal with given name.
+
+ stop <name>
+  - stop a running shared terminal.
+
+ setup
+  - install needed tools
+
+TEXT
+}
+
+main $@
