@@ -25,7 +25,7 @@ keep_size=$(echo $@ | grep -Po '\-k')
 
 ### Uncomment what you are using, hardcoded
 ## Laptop
-#fisical="LVDS1"
+fisical="LVDS1"
 ## VGA
 #fisical="VGA1"
 ## HDMI
