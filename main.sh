@@ -24,6 +24,12 @@ main() {
     ssh)
       ssh ${@:2}
     ;;
+    term*)
+      term $@
+    ;;
+    droid)
+      droid ${@:2}
+    ;;
     setup)
       setup
     ;;
@@ -131,6 +137,44 @@ ssh() {
   # /usr/sbin/sshd -p 22200 
 }
 
+term() {
+  $1 ${@:2}
+}
+
+termStart() {
+  name=$1
+  commands=${@:2}
+  screen -dmS $name
+  screen -X $name $commands
+  termConnect $name
+}
+
+termList() {
+  screen -ls
+}
+
+termConnect() {
+  screen -x $1
+}
+
+droid() {
+  droid_$1 ${@:2} 
+}
+
+droid_setDate() {
+  command="adb shell su -c \"date -s $1\" 0"
+  echo $command
+  $command
+}
+
+droid_help() {
+  cat <<TEXT
+Droid Commands
+ setDate <date format>
+  - change device date using format yyyyMMdd.HHmmss
+TEXT
+}
+
 setup() {
   # x11vnc 		- vnc server used to bind to part o xServer
   # bc 			- bash calculator, as we can't do some operations with default bash
@@ -168,14 +212,17 @@ Commands
   - command ssh server, just a wrapper to start, stop or restart the ssh server daemon.
     This will be needed to run screen commands
 
- screenStart <name> [commands [args]]
+ termStart <name> [commands [args]]
   - start a new screen with given name. This will allow others to connect to the same terminal, it's like a shared terminal.
 
- screenList
+ termList
   - list shared screens.
 
- screenConnect <name>
+ termConnect <name>
   - connect o a screen with given name
+
+ droid <setDate> [args]
+  - send droid commands
 
  setup
   - install necessary tools
