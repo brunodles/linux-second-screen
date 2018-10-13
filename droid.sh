@@ -9,7 +9,7 @@ setDate() {
 }
 
 getIp() {
-#  run "adb shell ip a"
+#  shell ip a
   shell netcfg
 }
 
