@@ -72,7 +72,7 @@ screenShot() {
   shell screencap -p /tmp/screencap.png
   pull /tmp/screencap.png $file
   
-  orientation=$(adb shell dumpsys input | grep 'SurfaceOrientation' | grep -oP "\d+")
+  orientation=$(orientation)
   echo "Orientation '$orientation'"
   rotation=$(( $orientation * -90 ))
   echo "Rotation '$rotation'"
@@ -80,6 +80,21 @@ screenShot() {
   xdg-open $file
 }
 
+orientation() {
+  orientation=$1
+  if [ -z "$orientation" ];then
+    orientation=0
+    echo $(adb shell dumpsys input | grep 'SurfaceOrientation' | grep -oP "\d+")
+    exit 0
+  fi
+  if [[ $orientation -lt 0 || $orientation -gt 4 ]];then
+    orientation=0
+    echo "Orientation value is invalid"
+    return 1
+  fi
+  echo "Orientation $orientation"
+  shell content insert --uri content://settings/system --bind name:s:user_rotation --bind value:i:$orientation
+}
 
 open() {
   home() {
@@ -134,6 +149,14 @@ Droid Commands
 
  screenshot
   - Take a screenshot from device.
+
+ orientation [direction]
+  - Check or Change device orientation device to direction
+    none - withou parameter can check current orientation
+    0 - portrait  - top
+    1 - landscape - left
+    2 - portrait  - bottom
+    3 - landscape - righ
 TEXT
 }
 
