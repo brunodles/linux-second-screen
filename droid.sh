@@ -1,5 +1,9 @@
 #!/bin/bash
 
+start() {
+  shell am start -a android.intent.action.VIEW $1
+}
+
 setDate() {
   su date -s $1
 }
@@ -101,6 +105,10 @@ run() {
 help() {
   cat <<TEXT
 Droid Commands
+
+ start <uri>
+  - start default app that may resolve the requested uri
+ 
  setDate <date format>
   - change device date using format yyyyMMdd.HHmmss
 
