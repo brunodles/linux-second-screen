@@ -1,5 +1,9 @@
 #!/bin/bash
 
+start() {
+  shell am start -a android.intent.action.VIEW $1
+}
+
 setDate() {
   su date -s $1
 }
