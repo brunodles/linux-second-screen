@@ -68,17 +68,16 @@ TEXT
 }
 
 screenShot() {
-  file=screencap.png
+  file=screenshot.png
   shell screencap -p /tmp/screencap.png
   pull /tmp/screencap.png $file
   
   orientation=$(adb shell dumpsys input | grep 'SurfaceOrientation' | grep -oP "\d+")
   echo "Orientation '$orientation'"
-  rotation=0
-  #rotation=$(( $orientation * 90 ))
+  rotation=$(( $orientation * -90 ))
   echo "Rotation '$rotation'"
-  run convert $file -rotate -90 $file
-  #xdg-open $file
+  run convert $file -rotate $rotation $file
+  xdg-open $file
 }
 
 
