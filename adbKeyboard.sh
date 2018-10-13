@@ -38,9 +38,9 @@ for i in $array; do
   code=$(keycode $i)
   if [ -z "$code" ]; then
     echo "text\>$i"
-    adb shell input keyevent $i
+    adb shell input text "$i"
   else
     echo " key\>$code"
-    adb shell input text "$i"
+    adb shell input keyevent $i
   fi
 done
