@@ -9,8 +9,19 @@ getIp() {
   shell netcfg
 }
 
+getSdk() {
+  shell getprop ro.build.version.sdk
+}
+
 wifiConnect() {
-# TODO: may need to do manually, look https://stackoverflow.com/a/9368211/1622925
+#  echo "Use one of following:"
+#  echo " wifiConnect_service"
+#  echo " wifiConnect_file"
+#  #wifiConnect_service
+  wifiConnect_file
+}
+
+wifiConnect_service() {
   shell am startservice \
     -n com.google.wifisetup/.WifiSetupService \
     -a WifiSetupService.Connect \
@@ -18,9 +29,50 @@ wifiConnect() {
     -e passphrase $2
 }
 
+wifiConnect_file() {
+  echo "Wanted ssid"
+  read -e ssid
+  echo "Password:"
+  read -es pass
+  echo "Password manager <WPA-PSK>"
+  read -e mgmt
+  if [ -z "$mgmt" ]; then
+    mgmt="WPA-PSK"
+  fi
+
+  { # try
+    pull /data/misc/wifi/wpa_supplicant.conf .wifi 
+  } || {
+    cat >.wifi<<TEXT
+ctrl_interface=tiwlan0
+update_config=1
+device_type=0-00000000-0
+TEXT
+  }
+  cat >>.wifi<<TEXT
+network={
+  ssid="$ssid"
+  psk="$pass"
+  key_mgmt=$mgmt
+  priority=1
+}
+TEXT
+  push .wifi /data/misc/wifi/wpa_supplicant.conf
+  run adb shell chown system.wifi /data/misc/wifi/wpa_supplicant.conf
+  run adb shell chmod 660 /data/misc/wifi/wpa_supplicant.conf
+  run adb shell am start -a android.intent.action.MAIN -n com.android.settings/.Settings
+}
+
 open() {
   home() {
     shell am start -a android.intent.action.MAIN -c android.intent.category.HOME
+  }
+  settings() {
+    shell am start -a android.intent.action.MAIN -n com.android.settings/.Settings
+  }
+  date() {
+    shell am start -a android.provider.Settings.ACTION_DATE_SETTINGS
+    shell am start -n com.android.settings/.DateTimeSettings
   }
   $1
 }
@@ -31,6 +83,14 @@ su() {
 
 shell() {
   run adb shell $@
+}
+
+pull() {
+  run adb pull $@
+}
+
+push() {
+  run adb push $@
 }
 
 run() {
