@@ -110,6 +110,19 @@ open() {
   $1
 }
 
+dev() {
+  touch() {
+    show() {
+      shell content insert --uri content://settings/system --bind name:s:show_touches --bind value:i:1
+    }
+    hide() {
+      shell content insert --uri content://settings/system --bind name:s:show_touches --bind value:i:0
+    }
+    $1
+  }
+  $@
+}
+
 su() {
   shell su -c \"$@\" 0
 }
@@ -157,6 +170,13 @@ Droid Commands
     1 - landscape - left
     2 - portrait  - bottom
     3 - landscape - righ
+
+ dev <touch>
+  - Manage some dev options
+  touch <show|hide>
+    - manage touch visibility
+      e.g: $0 dev touch show
+    
 TEXT
 }
 
