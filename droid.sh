@@ -67,6 +67,21 @@ TEXT
   run adb shell am start -a android.intent.action.MAIN -n com.android.settings/.Settings
 }
 
+screenShot() {
+  file=screencap.png
+  shell screencap -p /tmp/screencap.png
+  pull /tmp/screencap.png $file
+  
+  orientation=$(adb shell dumpsys input | grep 'SurfaceOrientation' | grep -oP "\d+")
+  echo "Orientation '$orientation'"
+  rotation=0
+  #rotation=$(( $orientation * 90 ))
+  echo "Rotation '$rotation'"
+  run convert $file -rotate -90 $file
+  #xdg-open $file
+}
+
+
 open() {
   home() {
     shell am start -a android.intent.action.MAIN -c android.intent.category.HOME
@@ -117,6 +132,9 @@ Droid Commands
 
  wifiConnect <ssid> <pasword>
   - Connectos to a wifi network
+
+ screenshot
+  - Take a screenshot from device.
 TEXT
 }
 
