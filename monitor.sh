@@ -5,16 +5,10 @@
 ## -v - VIRTUAL display to be used. Sample v1, v2, v3
 ## -left  - If our device is on the left
 ## -right - If our device is on the right
-## -hst	  - Subtract status bar size from virtual display
+## -hstb  - Subtract status bar size from virtual display
 ## -hsb	  - Subtract system bar size from virtual display
-
-### Uncomment what you are using, hardcoded
-## Laptop
-fisical="LVDS1"
-## VGA
-#fisical="VGA1"
-## HDMI
-#fisical="HDM1"
+## -f name- Where name should be one of LSVDS1, VGA1, HDM1
+## -k	  - Keep size
 
 ## ADB path. hardcoded
 adb_bin=~/android-sdk-linux/platform-tools/adb
@@ -24,10 +18,21 @@ adb_bin=~/android-sdk-linux/platform-tools/adb
 virtual=$(echo $@ | grep -Po '\-v\d' | grep -Po '\d')
 device=$(echo $@ | grep -Po '\d+x\d+')
 position=$(echo $@ | grep -Po '\-(left|right)' | grep -Po '\w+')
-hide_statusbar=$(echo $@ | grep -Po '\-hst')
+hide_statusbar=$(echo $@ | grep -Po '\-hstb')
 hide_systembar=$(echo $@ | grep -Po '\-hsb')
+fisical=$(echo $@ | grep -Po '\-f (LSVDS|VGA|HDMI)\d' | grep -Po '\w+\d')
+keep_size=$(echo $@ | grep -Po '\-k')
 
-
+### Uncomment what you are using, hardcoded
+## Laptop
+fisical="LVDS1"
+## VGA
+#fisical="VGA1"
+## HDMI
+#fisical="HDM1"
+if [ -z "$fisical" ] ; then
+	fisical="VGA1"
+fi
 
 ## Use VIRTUAL1 if none was passed
 if [ -z "$virtual" ] ; then
@@ -79,9 +84,14 @@ echo ""
 
 ## Proportion, bash don't handle float, only integers so we use bc to do that operation
 ##proportion=$(($d_height / $h_height))
-proportion=$(bc <<< "scale=2; $d_height / $h_height")
-v_width=$(bc <<< "scale=0; $d_width / $proportion")
-v_height=$h_height
+if [ ! -z "$keep_size" ] ; then
+	v_width=$d_width
+	v_height=$d_height
+else
+	proportion=$(bc <<< "scale=2; $d_height / $h_height")
+	v_width=$(bc <<< "scale=0; $d_width / $proportion")
+	v_height=$h_height
+fi
 #echo "width   = $v_width"
 status_bar=32
 system_bar=48
@@ -113,6 +123,8 @@ res=$(echo ${mode//\"} | cut -d'_' -f 1)
 #echo $modeline
 #echo $mode
 
+echo "fDisplay= $fisical"
+
 echo "device  = $device"
 #echo "width   = $d_width"
 #echo "height  = $d_height"
@@ -122,15 +134,15 @@ echo "host    = $host"
 #echo "height  = $h_height"
 echo "scale   = $proportion"
 
-echo "Display = $virtual"
+echo "vDisplay= $virtual"
 
-echo "virtual = $res"
+echo "vRes    = $res"
 echo ""
 
 ## Log and Run commands
 function run () {
 	echo "$1"
-	$1
+#	$1
 }
 
 ## Create Virtual Display

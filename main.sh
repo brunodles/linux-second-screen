@@ -1,0 +1,71 @@
+#!/bin/bash
+
+main() {
+  case $1 in
+    display|vnc|term|droid)
+      ./$1.sh ${@:2}
+    ;;
+    ssh)
+      ssh ${@:2}
+    ;;
+    setup)
+      setup
+    ;;
+    *)
+      help
+    ;;
+  esac
+}
+
+ssh() {
+  if [ "$1" == "setup" ]; then
+    mkdir .ssh
+    ssh-keygen -t rsa -f ./.ssh/ssh_host_rsa_key
+    ssh-keygen -t ecdsa -f ./.ssh/ssh_host_ecdsa_key
+    ssh-keygen -t ed25519 -f ./.ssh/ssh_host_ed25519_key
+  else
+    sudo service ssh $1
+  fi
+  # it won't be so easy, we may need to start a new ssh server with custom settings.
+  # To do so, we need to create ssh keys for our server, since we can't point to user ones.
+  # /usr/sbin/sshd -p 22200 
+}
+
+setup() {
+  # x11vnc 		- vnc server used to bind to part o xServer
+  # bc 			- bash calculator, as we can't do some operations with default bash
+  # screen 		- terminal used to share session, like vnc but with terminal
+  # openssh-server 	- secure shell, a tool to connect to terminal remotely
+  sudo apt-get install x11vnc bc screen openssh-server
+}
+
+help() {
+  cat <<TEXT
+Virtual Display Helper
+
+Commands
+ display
+  - Use to manage virtual display. With it we can also calculate suggested resolution for device.
+
+ vnc
+  - Wrapper for vnc commands. With it is possible to start vnc for a specific display or a window
+
+ ssh <start|stop|restart>
+  - command ssh server, just a wrapper to start, stop or restart the ssh server daemon.
+    This will be needed to run screen commands
+
+ term
+  - Wrapper to share terminal with others. They may need to connect using ssh.
+
+ droid
+  - send commands to android
+
+ setup
+  - install necessary tools
+
+ help
+  - show this message
+TEXT
+}
+
+main $@
