@@ -9,7 +9,7 @@ setDate() {
 }
 
 getIp() {
-#  run "adb shell ip a"
+#  shell ip a
   shell netcfg
 }
 
@@ -67,6 +67,35 @@ TEXT
   run adb shell am start -a android.intent.action.MAIN -n com.android.settings/.Settings
 }
 
+screenshot() {
+  file=screenshot.png
+  shell screencap -p /tmp/screencap.png
+  pull /tmp/screencap.png $file
+  
+  orientation=$(orientation)
+  echo "Orientation '$orientation'"
+  rotation=$(( $orientation * -90 ))
+  echo "Rotation '$rotation'"
+  run convert $file -rotate $rotation $file
+  xdg-open $file &
+}
+
+orientation() {
+  orientation=$1
+  if [ -z "$orientation" ];then
+    orientation=0
+    echo $(adb shell dumpsys input | grep 'SurfaceOrientation' | grep -oP "\d+")
+    exit 0
+  fi
+  if [[ $orientation -lt 0 || $orientation -gt 4 ]];then
+    orientation=0
+    echo "Orientation value is invalid"
+    return 1
+  fi
+  echo "Orientation $orientation"
+  shell content insert --uri content://settings/system --bind name:s:user_rotation --bind value:i:$orientation
+}
+
 open() {
   home() {
     shell am start -a android.intent.action.MAIN -c android.intent.category.HOME
@@ -79,6 +108,34 @@ open() {
     shell am start -n com.android.settings/.DateTimeSettings
   }
   $1
+}
+
+dev() {
+  touch() {
+    show() {
+      shell content insert --uri content://settings/system --bind name:s:show_touches --bind value:i:1
+    }
+    hide() {
+      shell content insert --uri content://settings/system --bind name:s:show_touches --bind value:i:0
+    }
+    $1
+  }
+  $@
+}
+
+resolution() {
+  shell dumpsys window | grep Display: | grep -Po "(\d+x\d+)" | head -1
+}
+
+# Thanks to MaxChinni https://stackoverflow.com/a/24038245/1622925
+input() {
+  record() {
+    adb shell getevent | grep --line-buffered ^/ | tee /tmp/android-touch-events.log
+  }
+  playback() {
+    awk '{printf "%s %d %d %d\n", substr($1, 1, length($1) -1), strtonum("0x"$2), strtonum("0x"$3), strtonum("0x"$4)}' /tmp/android-touch-events.log | xargs -l echo adb shell sendevent
+  }
+  $@
 }
 
 su() {
@@ -117,6 +174,30 @@ Droid Commands
 
  wifiConnect <ssid> <pasword>
   - Connectos to a wifi network
+
+ screenshot
+  - Take a screenshot from device.
+
+ orientation [direction]
+  - Check or Change device orientation device to direction
+    none - withou parameter can check current orientation
+    0 - portrait  - top
+    1 - landscape - left
+    2 - portrait  - bottom
+    3 - landscape - righ
+
+ resolution
+  - Print device resolution
+
+ input <record|playback>
+  - record and playback inputs on device.
+
+ dev <touch>
+  - Manage some dev options
+  touch <show|hide>
+    - manage touch visibility
+      e.g: $0 dev touch show
+    
 TEXT
 }
 
