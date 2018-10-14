@@ -87,8 +87,12 @@ screenshot() {
 orientation() {
   orientation=$1
   if [ -z "$orientation" ];then
-    orientation=0
-    echo $(adb shell dumpsys input | grep 'SurfaceOrientation' | grep -oP "\d+")
+    orientation=$(adb shell dumpsys input | grep 'SurfaceOrientation' | grep -oP "\d+")
+    if [ -z "$orientation" ]; then
+      # old devices does not have input service, so we need to dump whole sys
+      orientation=$(adb shell dumpsys | grep 'SurfaceOrientation' | grep -oP "\d+")
+    fi
+    echo $orientation
     exit 0
   fi
   if [[ $orientation -lt 0 || $orientation -gt 4 ]];then
