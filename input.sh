@@ -2,26 +2,31 @@
 CONFIG_FILE=".input.config"
 KEY_X=53
 KEY_Y=54
-#KEY_X=0
-#KEY_Y=1
 declare INPUT
+DOC=""
+declare ORIENTATION
 
-# Find event input by type
-# $1 = input type
-#   know types:
-#     lm3530_led
-#     proximity
-#     sholes-keypad
-#     qtouch-touchscreen
-#     cpcap-key
-#     accelerometer
-#     compass
+DOC+="
+  findInput <input type>
+    - Find event input by type
+      know types:
+        lm3530_led
+        proximity
+        sholes-keypad
+        qtouch-touchscreen
+        cpcap-key
+        accelerometer
+        compass
+"
 findInput() {
   timeout 1 adb shell getevent > /tmp/inputs
   cat /tmp/inputs | grep -B 1 "$1" | grep -Po "/dev/input/event(\d+)"
 }
 
-# Update config file, needed after change device
+DOC+="
+  updateConfig
+    - Update config file, needed after device change
+"
 updateConfig() { 
   INPUT=$(findInput "touch")
   echo "INPUT=$INPUT">$CONFIG_FILE
@@ -33,17 +38,29 @@ if [ -z "$INPUT" ]; then
   updateConfig
 fi
 
+DOC+="
+  tap <x> <y>
+    - send tap event on position
+"
 tap() {
   touch $1 $2
   execute
 }
 
+DOC+="
+  swipe <x1> <y1> <x2> <y2>
+    - send swipe event
+"
 swipe() {
   touch $1 $2
   touch $3 $4
   execute
 }
 
+DOC+="
+  touch <x> <y>
+    - send touch event. This one keeps touch pressed.
+"
 touch() {
   sendevent $INPUT 3 $KEY_X $1
   sendevent $INPUT 3 $KEY_Y $2
@@ -77,6 +94,8 @@ usage:  $0 <command>
         $0 tap <x> <y>
         $0 swipe <x1> <y1> <x2> <y2>
 
+Other commands:
+$DOC
 TEXT
 }
 
