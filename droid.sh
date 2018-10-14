@@ -9,8 +9,12 @@ setDate() {
 }
 
 getIp() {
-#  shell ip a
-  shell netcfg
+  ip=$(shell netcfg)
+  if [[ "$ip"  == *"not found"* ]]; then
+    shell ip a
+  else
+    echo $ip
+  fi
 }
 
 getSdk() {
@@ -83,8 +87,12 @@ screenshot() {
 orientation() {
   orientation=$1
   if [ -z "$orientation" ];then
-    orientation=0
-    echo $(adb shell dumpsys input | grep 'SurfaceOrientation' | grep -oP "\d+")
+    orientation=$(adb shell dumpsys input | grep 'SurfaceOrientation' | grep -oP "\d+")
+    if [ -z "$orientation" ]; then
+      # old devices does not have input service, so we need to dump whole sys
+      orientation=$(adb shell dumpsys | grep 'SurfaceOrientation' | grep -oP "\d+")
+    fi
+    echo $orientation
     exit 0
   fi
   if [[ $orientation -lt 0 || $orientation -gt 4 ]];then
@@ -170,7 +178,7 @@ Droid Commands
   - change device date using format yyyyMMdd.HHmmss
 
  getIp
-  - Print all IPs for device
+  - Print all IPs for device. Result may vary depend on device.
 
  wifiConnect <ssid> <pasword>
   - Connectos to a wifi network
