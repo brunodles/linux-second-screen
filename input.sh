@@ -88,6 +88,10 @@ touch() {
       x=$1
       y=$(( $MAX_Y - $2 - 10 ))
     ;;
+    *)
+      x=$1
+      y=$2
+    ;;
   esac
   sendevent $INPUT 3 $KEY_X $x
   sendevent $INPUT 3 $KEY_Y $y
