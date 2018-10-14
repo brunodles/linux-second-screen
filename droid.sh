@@ -123,6 +123,10 @@ dev() {
   $@
 }
 
+resolution() {
+  shell dumpsys window | grep Display: | grep -Po "(\d+x\d+)" | head -1
+}
+
 su() {
   shell su -c \"$@\" 0
 }
@@ -170,6 +174,9 @@ Droid Commands
     1 - landscape - left
     2 - portrait  - bottom
     3 - landscape - righ
+
+ resolution
+  - Print device resolution
 
  dev <touch>
   - Manage some dev options
