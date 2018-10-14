@@ -1,7 +1,13 @@
 #!/bin/bash
 CONFIG_FILE=".input.config"
+
 KEY_X=53
 KEY_Y=54
+MIN_X=20
+MAX_X=1004
+MIN_Y=0
+MAX_Y=960
+
 declare INPUT
 DOC=""
 declare ORIENTATION
@@ -62,8 +68,29 @@ DOC+="
     - send touch event. This one keeps touch pressed.
 "
 touch() {
-  sendevent $INPUT 3 $KEY_X $1
-  sendevent $INPUT 3 $KEY_Y $2
+  if [ -z "$ORIENTATION" ]; then
+    ORIENTATION=$(orientation)
+  fi
+  case $ORIENTATION in
+    0)
+      x=$(( $MIN_X + $1 ))
+      y=$(( $MIN_Y + $2 ))
+    ;;
+    1)
+      x=$(( $MAX_X - $2 - 10 ))
+      y=$(( $1 - 20 ))
+    ;;
+    2)
+      x=$(( $MAX_X - $1 ))
+      y=$(( $MAX_Y - $2 ))
+    ;;
+    3)
+      x=$1
+      y=$(( $MAX_Y - $2 - 10 ))
+    ;;
+  esac
+  sendevent $INPUT 3 $KEY_X $x
+  sendevent $INPUT 3 $KEY_Y $y
   execute
 }
 
@@ -74,17 +101,17 @@ execute() {
   sendevent $INPUT 0 0 0
 }
 
+# Send event to android device
 sendevent() {
-#  echo adb shell sendevent $@
+  echo adb shell sendevent $@
   adb shell sendevent $@
 }
 
-# declare touch down?
-#sendevent $event 3 48 1
-
-# ???
-#sendevent $event 3 52 0
-#sendevent $event 3 57 0
+# get current orientation
+orientation() {
+#  echo $(adb shell dumpsys input | grep 'SurfaceOrientation' | grep -oP "\d+")
+  echo $(./droid.sh orientation)
+}
 
 help() {
   cat <<TEXT
