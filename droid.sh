@@ -9,8 +9,12 @@ setDate() {
 }
 
 getIp() {
-#  shell ip a
-  shell netcfg
+  ip=$(shell netcfg)
+  if [[ "$ip"  == *"not found"* ]]; then
+    shell ip a
+  else
+    echo $ip
+  fi
 }
 
 getSdk() {
@@ -170,7 +174,7 @@ Droid Commands
   - change device date using format yyyyMMdd.HHmmss
 
  getIp
-  - Print all IPs for device
+  - Print all IPs for device. Result may vary depend on device.
 
  wifiConnect <ssid> <pasword>
   - Connectos to a wifi network
