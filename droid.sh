@@ -127,6 +127,17 @@ resolution() {
   shell dumpsys window | grep Display: | grep -Po "(\d+x\d+)" | head -1
 }
 
+# Thanks to MaxChinni https://stackoverflow.com/a/24038245/1622925
+input() {
+  record() {
+    adb shell getevent | grep --line-buffered ^/ | tee /tmp/android-touch-events.log
+  }
+  playback() {
+    awk '{printf "%s %d %d %d\n", substr($1, 1, length($1) -1), strtonum("0x"$2), strtonum("0x"$3), strtonum("0x"$4)}' /tmp/android-touch-events.log | xargs -l echo adb shell sendevent
+  }
+  $@
+}
+
 su() {
   shell su -c \"$@\" 0
 }
@@ -177,6 +188,9 @@ Droid Commands
 
  resolution
   - Print device resolution
+
+ input <record|playback>
+  - record and playback inputs on device.
 
  dev <touch>
   - Manage some dev options
