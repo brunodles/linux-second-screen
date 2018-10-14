@@ -67,7 +67,7 @@ TEXT
   run adb shell am start -a android.intent.action.MAIN -n com.android.settings/.Settings
 }
 
-screenShot() {
+screenshot() {
   file=screenshot.png
   shell screencap -p /tmp/screencap.png
   pull /tmp/screencap.png $file
@@ -77,7 +77,7 @@ screenShot() {
   rotation=$(( $orientation * -90 ))
   echo "Rotation '$rotation'"
   run convert $file -rotate $rotation $file
-  xdg-open $file
+  xdg-open $file &
 }
 
 orientation() {
