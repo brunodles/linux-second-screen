@@ -6,6 +6,10 @@ if [ -f "$CONFIG_FILE" ]; then
 fi
 
 case $1 in
+  "")
+    echo Selected device \"$ANDROID_SERIAL\"
+    exit 0
+  ;;
   add)
     echo "$2=$3">>$CONFIG_FILE
   ;;
