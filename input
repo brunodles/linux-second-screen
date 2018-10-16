@@ -114,7 +114,7 @@ sendevent() {
 # get current orientation
 orientation() {
 #  echo $(adb shell dumpsys input | grep 'SurfaceOrientation' | grep -oP "\d+")
-  echo $(./droid.sh orientation)
+  echo $(./droid orientation)
 }
 
 help() {
