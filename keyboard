@@ -1,5 +1,5 @@
 #!/bin/bash
-. ./adbKeyboard_keycodes
+. ./.keycodes
 
 keycode() {
   mode=$(( $2 + 1 ))
