@@ -1,13 +1,26 @@
 #!/bin/bash
+DOC=""
 
+DOC+="
+ start <uri>
+  - start default app that may resolve the requested uri
+"
 start() {
   shell am start -a android.intent.action.VIEW $1
 }
 
+DOC+="
+ setDate <date format>
+  - change device date using format yyyyMMdd.HHmmss
+"
 setDate() {
   su date -s $1
 }
 
+DOC+="
+ getIp
+  - Print all IPs for device. Result may vary depend on device.
+"
 getIp() {
   ip=$(shell netcfg)
   if [[ "$ip"  == *"not found"* ]]; then
@@ -17,10 +30,26 @@ getIp() {
   fi
 }
 
+DOC+="
+ getSdk
+  - Print device sdk version number
+"
 getSdk() {
   shell getprop ro.build.version.sdk
 }
 
+DOC+="
+ getModel
+  - Print device model
+"
+getModel() {
+  shell getprop ro.product.model
+}
+
+DOC+="
+ wifiConnect
+  - Connectos to a wifi network
+"
 wifiConnect() {
 #  echo "Use one of following:"
 #  echo " wifiConnect_service"
@@ -29,6 +58,11 @@ wifiConnect() {
   wifiConnect_file
 }
 
+DOC+="
+ wifiConnect_service <ssid> <password>
+  - Connect to wifi network using an android service
+  - EXPERIMENTAL
+"
 wifiConnect_service() {
   shell am startservice \
     -n com.google.wifisetup/.WifiSetupService \
@@ -37,6 +71,11 @@ wifiConnect_service() {
     -e passphrase $2
 }
 
+DOC+="
+ wifiConnect_file
+  - Connect to wifi network using configuration file inside device
+  - EXPERIMENTAL - this one works but need futher improvements.
+"
 wifiConnect_file() {
   echo "Wanted ssid"
   read -e ssid
@@ -71,8 +110,15 @@ TEXT
   run adb shell am start -a android.intent.action.MAIN -n com.android.settings/.Settings
 }
 
+DOC+="
+ screenshot [file name]
+  - Take a screenshot from device.
+"
 screenshot() {
   file=screenshot.png
+  if [ ! -z "$1" ]; then
+    file=$1
+  fi
   shell screencap -p /tmp/screencap.png
   pull /tmp/screencap.png $file
   
@@ -84,6 +130,15 @@ screenshot() {
   xdg-open $file &
 }
 
+DOC+="
+ orientation [direction]
+  - Check or Change device orientation device to direction
+    none - without parameter, print current orientation
+    0 - portrait  - top
+    1 - landscape - left
+    2 - portrait  - bottom
+    3 - landscape - righ
+"
 orientation() {
   orientation=$1
   if [ -z "$orientation" ];then
@@ -118,6 +173,13 @@ open() {
   $1
 }
 
+DOC+="
+ dev <touch>
+  - Manage some dev options
+  touch <show|hide>
+    - manage touch visibility
+      e.g: $0 dev touch show
+"
 dev() {
   touch() {
     show() {
@@ -131,11 +193,19 @@ dev() {
   $@
 }
 
+DOC+="
+ resolution
+  - Print device resolution
+"
 resolution() {
   shell dumpsys window | grep Display: | grep -Po "(\d+x\d+)" | head -1
 }
 
 # Thanks to MaxChinni https://stackoverflow.com/a/24038245/1622925
+DOC+="
+ input <record|playback>
+  - record and playback inputs on device.
+"
 input() {
   record() {
     adb shell getevent | grep --line-buffered ^/ | tee /tmp/android-touch-events.log
@@ -144,6 +214,12 @@ input() {
     awk '{printf "%s %d %d %d\n", substr($1, 1, length($1) -1), strtonum("0x"$2), strtonum("0x"$3), strtonum("0x"$4)}' /tmp/android-touch-events.log | xargs -l echo adb shell sendevent
   }
   $@
+}
+
+install() {
+  file="/tmp/apk.apk"
+  curl -o $file $1
+  run adb install $file
 }
 
 su() {
@@ -170,42 +246,8 @@ run() {
 help() {
   cat <<TEXT
 Droid Commands
-
- start <uri>
-  - start default app that may resolve the requested uri
- 
- setDate <date format>
-  - change device date using format yyyyMMdd.HHmmss
-
- getIp
-  - Print all IPs for device. Result may vary depend on device.
-
- wifiConnect <ssid> <pasword>
-  - Connectos to a wifi network
-
- screenshot
-  - Take a screenshot from device.
-
- orientation [direction]
-  - Check or Change device orientation device to direction
-    none - withou parameter can check current orientation
-    0 - portrait  - top
-    1 - landscape - left
-    2 - portrait  - bottom
-    3 - landscape - righ
-
- resolution
-  - Print device resolution
-
- input <record|playback>
-  - record and playback inputs on device.
-
- dev <touch>
-  - Manage some dev options
-  touch <show|hide>
-    - manage touch visibility
-      e.g: $0 dev touch show
-    
+  General command
+$DOC
 TEXT
 }
 
