@@ -3,7 +3,7 @@
 main() {
   case $1 in
     display|vnc|term|droid)
-      ./$1.sh ${@:2}
+      ./$1 ${@:2}
     ;;
     ssh)
       ssh ${@:2}

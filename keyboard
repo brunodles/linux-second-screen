@@ -1,5 +1,5 @@
 #!/bin/bash
-. ./adbKeyboard_keycodes
+. ./.keycodes
 
 keycode() {
   mode=$(( $2 + 1 ))
@@ -27,6 +27,11 @@ keycode() {
   echo $(keycode $1 $mode)
 }
 
+input() {
+  echo adb shell input $@
+  adb shell input $@
+}
+
 text=$@
 # String.replace " ", "%s"
 text=${text// /%s}
@@ -38,9 +43,9 @@ for i in $array; do
   code=$(keycode $i)
   if [ -z "$code" ]; then
     echo "text\>$i"
-    adb shell input text "$i"
+    ipnut text "$i"
   else
     echo " key\>$code"
-    adb shell input keyevent $i
+    input keyevent $code
   fi
 done
