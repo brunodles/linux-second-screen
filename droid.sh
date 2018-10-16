@@ -159,6 +159,10 @@ orientation() {
   shell content insert --uri content://settings/system --bind name:s:user_rotation --bind value:i:$orientation
 }
 
+DOC+="
+ open <home|settings|date>
+  - Open a predefined activity
+"
 open() {
   home() {
     shell am start -a android.intent.action.MAIN -c android.intent.category.HOME
@@ -216,33 +220,46 @@ input() {
   $@
 }
 
+DOC+="
+ install <url>
+  - download apk and install on device
+"
 install() {
   file="/tmp/apk.apk"
   curl -o $file $1
   run adb install $file
 }
 
+DOC+="
+ su <command>
+  - send command as super user
+"
 su() {
   shell su -c \"$@\" 0
 }
 
+# Just a wrapper for adb shell
 shell() {
   run adb shell $@
 }
 
+# Just a wrapper for adb pull
 pull() {
   run adb pull $@
 }
 
+# Just a wrapper for adb push
 push() {
   run adb push $@
 }
 
+# A simple wrapper to print commands in stdout before execute
 run() {
   echo \>$@
   $@
 }
 
+# Helper command
 help() {
   cat <<TEXT
 Droid Commands
