@@ -230,6 +230,17 @@ install() {
   run adb install $file
 }
 
+# Thanks to geffchang https://android.stackexchange.com/a/47994
+# and Izzy https://android.stackexchange.com/questions/47989/how-can-i-shutdown-my-android-phone-using-an-adb-command#comment64570_47994
+DOC+="
+ shutdown
+  - shutdown device
+"
+shutdown() {
+  # -p stands for --power-off
+  shell reboot -p
+}
+
 DOC+="
  su <command>
   - send command as super user
