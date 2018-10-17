@@ -6,7 +6,7 @@ DOC+="
   - start default app that may resolve the requested uri
 "
 start() {
-  shell am start -a android.intent.action.VIEW $1
+  shell am start -a android.intent.action.VIEW $@
 }
 
 DOC+="
