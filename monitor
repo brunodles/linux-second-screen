@@ -1,0 +1,86 @@
+#!/bin/bash
+# setup wanted display and network adapter
+display=1
+network=wlp9s0
+
+###
+# Step 1
+###
+step1(){
+  # resolution - this one may fail, so you may have to get this information from internet
+  # ./droid resolution
+  resolution=$(./droid resolution)
+
+  # replace resolution ´x´ by ´ ´ (space)
+  resolution=${resolution/x/ }
+
+  # orientation
+  # ./droid orientation
+  orientation=$(./droid orientation)
+
+  # inches - this one may fail too, cause we need resolution and density to calculate an aproximate screen inches
+  # ./droid inches
+  inches=$(./droid inches)
+}
+
+###
+# Step 2
+###
+step2() {
+  # ./display calcRes $resolution $inches
+  virtual=$(./display calcRes $resolution $inches | grep virtual | grep -Po "(\d+x\d+)")
+}
+
+
+###
+# Step 3
+###
+step3() {
+  virtual=(${virtual/x/ })
+  width=${virtual[0]}
+  height=${virtual[1]}
+  virtual_display=VIRTUAL$display
+  if [ "$orientation" == "0" ] || [ "$orientation" == "2" ]; then
+    # portrait
+    ./display setRes $virtual_display $width $height
+  else 
+    # landscape
+    ./display setRes $virtual_display $height $width
+  fi
+}
+
+
+###
+# Step 4
+###
+step4() {
+  ./vnc start $display
+}
+
+
+###
+# Step 5
+###
+step5() {
+  address=$(ip addr show | grep -A 2 $network | grep -Po "\d+\.\d+\.\d+\.\d+")
+  ./droid start "\"vnc://$address:5900\""
+}
+
+
+###
+# Step 6
+###
+step6() {
+  ./display clean $display
+}
+
+if [ ! -z "$1" ]; then
+  step$1
+else
+  step1
+  step2
+  step3
+  step5 &
+  step4
+  step6
+fi
