@@ -142,10 +142,10 @@ DOC+="
 orientation() {
   orientation=$1
   if [ -z "$orientation" ];then
-    orientation=$(adb shell dumpsys input | grep 'SurfaceOrientation' | grep -oP "\d+")
+    orientation=$(adb shell dumpsys input | grep 'SurfaceOrientation' | grep -oP "\d+" | head -n 1)
     if [ -z "$orientation" ]; then
       # old devices does not have input service, so we need to dump whole sys
-      orientation=$(adb shell dumpsys | grep 'SurfaceOrientation' | grep -oP "\d+")
+      orientation=$(adb shell dumpsys | grep 'SurfaceOrientation' | grep -oP "\d+" | head -n 1)
     fi
     echo $orientation
     exit 0
@@ -202,7 +202,7 @@ DOC+="
   - Print device resolution
 "
 resolution() {
-  shell dumpsys window | grep Display: | grep -Po "(\d+x\d+)" | head -1
+  shell dumpsys window | grep -A1 Display: | grep -Po "(\d+x\d+)" | head -1
 }
 
 # Thanks to MaxChinni https://stackoverflow.com/a/24038245/1622925
