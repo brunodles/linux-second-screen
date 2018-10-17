@@ -16,6 +16,9 @@ main() {
     calcRes)
       calcRes ${@:2}
     ;;
+    clean)
+      clean ${@:2}
+    ;;
     *)
       help
     ;;
@@ -144,6 +147,27 @@ calcRes() {
   echo "horizontal  ${rv_hori_width}x${rv_hori_height}"
 }
 
+clean() {
+  display=VIRTUAL$1
+  mode=$(xrandr | grep -A 1 $display | grep -Po "\d+x\d+")
+
+  if [ -z "$mode" ]; then
+    echo "Can't find a valid mode"
+    exit 1
+  fi
+  
+  echo "display $display"
+  echo "   mode $mode"
+
+  for m in $mode ; do
+    echo "Try to remove $m"
+    xrandr --output $display --off
+    xrandr --delmode $display $m
+    xrandr --rmmode $m
+  done
+  xrandr -s 0
+}
+
 help() {
 cat <<TEXT
 Virtual Display
@@ -161,6 +185,9 @@ Commands
   - calculate possible resolutions for a device.
     As devices may have same or  even greater resolutions compared to a normal display, de idea is to use a lower resolution for this device. This leads to a better visualization and performance.
 
+ clean <virtual display number>
+  - clean modes and resolution, also turns virtual display off
+    example: $0 clean 1
 TEXT
 }
 main $@
