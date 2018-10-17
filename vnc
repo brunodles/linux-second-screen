@@ -38,12 +38,12 @@ help() {
 Vnc wrapper
 
 Commands:
- start <command> [args]
+ start <display> [x11vnc args]
   - start vnc for given display
     example: $0 startVnc 1 -scale 1/2:nb -ncache 0
       This will start vnc using scale 1/2 wihout bleeding and 0 cache
 
- window [x11vnc commands]
+ window [x11vnc args]
   - start vnc for a window, you will need to click on desired window
 
 TEXT
