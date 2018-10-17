@@ -95,11 +95,16 @@ setRes() {
   
   modeline=${modeline//\"}
   modeName=${modeName//\"}
+  newModeName=$(echo $modeName | cut -d'_' -f1)
+  modeline=${modeline/$modeName/$newModeName}
+  modeName=$newModeName
+
+  primary=$(xrandr| grep primary | cut -d ' ' -f 1)
 
   echo Creating \"$modeName\" on \"$virtual\"
   xrandr --newmode $modeline
   xrandr --addmode $virtual $modeName
-  xrandr --output $virtual --mode $modeName --auto
+  xrandr --output $virtual --mode $modeName --auto --right-of $primary
 }
 
 calcRes() {
@@ -130,13 +135,13 @@ calcRes() {
 
   echo Proportion $proportion
   echo "           Width x Height Inches"
-  echo "   fisical  $f_width x $f_height $f_inches"
-  echo "    wanted  $w_width x $w_height $w_inches"
+  echo "   fisical  ${f_width}x${f_height} $f_inches"
+  echo "    wanted  ${w_width}x${w_height} $w_inches"
   echo "----------------------------  Virtual"
-  echo "   virtual  $v_width x $v_height"
+  echo "   virtual  ${v_width}x${v_height}"
   echo "----------------------------  Resize + virtual"
-  echo "  vertical  $rv_vert_width x $rv_vert_height"
-  echo "horizontal  $rv_hori_width x $rv_hori_height"
+  echo "  vertical  ${rv_vert_width}x${rv_vert_height}"
+  echo "horizontal  ${rv_hori_width}x${rv_hori_height}"
 }
 
 help() {
