@@ -47,6 +47,14 @@ getModel() {
 }
 
 DOC+="
+ getBrand
+  - Print device brand
+"
+getBrand() {
+  getprop ro.product.brand
+}
+
+DOC+="
  wifiConnect
   - Connectos to a wifi network
 "
