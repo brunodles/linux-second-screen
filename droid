@@ -113,9 +113,9 @@ network={
 }
 TEXT
   push .wifi /data/misc/wifi/wpa_supplicant.conf
-  run adb shell chown system.wifi /data/misc/wifi/wpa_supplicant.conf
-  run adb shell chmod 660 /data/misc/wifi/wpa_supplicant.conf
-  run adb shell am start -a android.intent.action.MAIN -n com.android.settings/.Settings
+  adb shell chown system.wifi /data/misc/wifi/wpa_supplicant.conf
+  adb shell chmod 660 /data/misc/wifi/wpa_supplicant.conf
+  adb shell am start -a android.intent.action.MAIN -n com.android.settings/.Settings
 }
 
 DOC+="
@@ -134,7 +134,7 @@ screenshot() {
   echo "Orientation '$orientation'"
   rotation=$(( $orientation * -90 ))
   echo "Rotation '$rotation'"
-  run convert $file -rotate $rotation $file
+  convert $file -rotate $rotation $file
   xdg-open $file &
 }
 
@@ -258,7 +258,7 @@ DOC+="
 install() {
   file="/tmp/apk.apk"
   curl -o $file $1
-  run adb install $file
+  adb install $file
 }
 
 # Thanks to geffchang https://android.stackexchange.com/a/47994
@@ -282,17 +282,17 @@ su() {
 
 # Just a wrapper for adb shell
 shell() {
-  run adb shell $@
+  adb shell $@
 }
 
 # Just a wrapper for adb pull
 pull() {
-  run adb pull $@
+  adb pull $@
 }
 
 # Just a wrapper for adb push
 push() {
-  run adb push $@
+  adb push $@
 }
 
 DOC+="
@@ -306,12 +306,6 @@ getprop() {
   else
     shell getprop $@ | grep -Po "[^\r]+"
   fi
-}
-
-# A simple wrapper to print commands in stdout before execute
-run() {
-  echo \>$@
-  $@
 }
 
 # Helper command
