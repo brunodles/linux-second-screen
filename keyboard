@@ -43,7 +43,7 @@ for i in $array; do
   code=$(keycode $i)
   if [ -z "$code" ]; then
     echo "text\>$i"
-    ipnut text "$i"
+    input text "$i"
   else
     echo " key\>$code"
     input keyevent $code
