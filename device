@@ -31,7 +31,13 @@ usage:
 TEXT
   ;;
   *)
-    ANDROID_SERIAL=$(eval echo \$$1)
-    echo Serial \"$ANDROID_SERIAL\"
+    set +e
+    ANDROID_SERIAL=$(eval echo \${$1} 2>&1 > /dev/null)
+    if [ "$?" != "0" ] || [ -z "$ANDROID_SERIAL" ]; then
+      ANDROID_SERIAL=$1
+    fi
+    export ANDROID_SERIAL
     ${@:2}
+#    echo " Serial \"$ANDROID_SERIAL\""
+#    echo "Command \"${@:2}\""
 esac
