@@ -35,7 +35,7 @@ DOC+="
   - Print device sdk version number
 "
 getSdk() {
-  shell getprop ro.build.version.sdk
+  getprop ro.build.version.sdk
 }
 
 DOC+="
@@ -43,7 +43,7 @@ DOC+="
   - Print device model
 "
 getModel() {
-  shell getprop ro.product.model
+  getprop ro.product.model
 }
 
 DOC+="
@@ -211,7 +211,7 @@ DOC+="
 "
 density() {
   # grep on the and to remove carriage return (\r)
-  adb shell getprop ro.sf.lcd_density | grep -Po "(\d+)"
+  getprop ro.sf.lcd_density | grep -Po "(\d+)"
 }
 
 DOC+="
