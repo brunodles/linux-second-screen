@@ -30,6 +30,18 @@ usage:
     - Show this message
 TEXT
   ;;
+  all)
+    lines=$(adb devices | tail --lines=+2)
+    IFS=$'\n'
+    for line in $lines ; do
+      if [[ "$line" == *"no permissions"* ]] || [[ "$line" == *"offline"* ]]; then
+        continue
+      fi
+      split=($(echo $line | grep -Po "[^\s]+"))
+      export ANDROID_SERIAL=$split
+      ${@:2} &
+    done
+  ;;
   *)
     set +e
     ANDROID_SERIAL=$(eval echo \${$1} 2>&1 > /dev/null)
