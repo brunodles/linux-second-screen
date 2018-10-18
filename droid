@@ -287,6 +287,19 @@ push() {
   run adb push $@
 }
 
+DOC+="
+ getprop [property name]
+  - read a property from device
+    If not property were inform print whole property file
+"
+getprop() {
+  if [ -z "$@" ]; then
+    shell getprop
+  else
+    shell getprop $@ | grep -Po "[^\r]+"
+  fi
+}
+
 # A simple wrapper to print commands in stdout before execute
 run() {
   echo \>$@
