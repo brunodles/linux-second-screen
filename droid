@@ -2,6 +2,41 @@
 DOC=""
 
 DOC+="
+ devices
+  - list devices and their model
+"
+devices() {
+  lines=$(adb devices | tail --lines=+2)
+  echo List of devices attached
+  IFS=$'\n'
+  output="Serial;Brand;Model;Product;SDK\n"
+  output+="------;-----;-----;-------;---\n"
+  for line in $lines ; do
+    split=($(echo $line | grep -Po "[^\s]+"))
+    if [[ "$line" == *"no permissions"* ]]; then
+      output+="$split;no permissions\n"
+      permissions=${split[@]:1}
+      continue
+    fi
+    if [[ "$line" == *"offline"* ]]; then
+      output+="$split;offline\n"
+      offline=${split[@]:1}
+      continue
+    fi
+    export ANDROID_SERIAL=$split
+    output+="$split;$(getBrand);$(getModel);$(getprop ro.build.product);$(getSdk)\n"
+  done
+  echo -e $output | column -t -s ';'
+  echo ""
+  if [ ! -z "$permissions" ]; then
+    echo "* $permissions"
+  fi
+  if [ ! -z "$offline" ];then
+    echo "* $offline - looks like device is offline or adb over network is not enabled on device"
+  fi
+}
+
+DOC+="
  start <uri>
   - start default app that may resolve the requested uri
 "
