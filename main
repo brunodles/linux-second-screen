@@ -11,6 +11,9 @@ main() {
     setup)
       setup
     ;;
+    usb)
+      usb
+    ;;
     *)
       help
     ;;
@@ -39,6 +42,14 @@ setup() {
   sudo apt-get install x11vnc bc screen openssh-server
 }
 
+DOC+=" 
+ usb
+  - Print devices connected to usb 
+" 
+usb() { 
+  lsusb | grep --color -P "\w+:\w+"  
+}
+
 help() {
   cat <<TEXT
 Virtual Display Helper
@@ -62,7 +73,7 @@ Commands
 
  setup
   - install necessary tools
-
+$DOC
  help
   - show this message
 TEXT
