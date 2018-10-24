@@ -5,7 +5,7 @@ keycode() {
   mode=$(( $2 + 1 ))
   case $mode in
     1)
-      code=$(eval echo \$$1)
+      code=$(eval echo \${$1})
     ;;
     2)
       code=$(eval echo \$KEYCODE_$1)
