@@ -1,6 +1,13 @@
 # linux-second-screen
 Scripts to repurpose old android device as second monitor on linux
 
+## Warnning
+This script is using Legacy nVidea Driver and may not be compatible anymore.
+It was created on 2017 and it's not actively maintained.
+Please be carefull if you insist to use it.
+One alternative cold be using the [evdi kernel module](https://github.com/DisplayLink/evdi/).
+Look [here](https://github.com/brunodles/linux-second-screen/issues/25) for more details.
+
 ## Usage
 This repo have many bash scripts to interact with android using adb.
 Each script have it's own function.
