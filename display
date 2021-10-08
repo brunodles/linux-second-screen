@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 declare INTEL_FILE="/usr/share/X11/xorg.conf.d/20-intel.conf"
 declare XORG_FILE="/usr/share/X11/xorg.conf.d/01-dummy-monitor.conf"
 
