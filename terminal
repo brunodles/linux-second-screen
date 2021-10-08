@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 ALIAS_FILE=~/.term_sharedAliases
 
 main() {

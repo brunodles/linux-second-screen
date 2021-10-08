@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # setup wanted display and network adapter
 display=1
 network=wlp9s0
